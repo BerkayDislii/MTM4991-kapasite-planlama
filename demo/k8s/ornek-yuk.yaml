@@ -1,0 +1,20 @@
+# Deneme yükü: her biri 1 çekirdek + 1 GiB isteyen 5 pod.
+# Tek c8i düğümü 4 çekirdek verdiği için 4 pod çalışır, 1 pod "Pending" kalır = eksik kapasite.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deneme-yuk
+spec:
+  replicas: 5
+  selector: {matchLabels: {app: deneme-yuk}}
+  template:
+    metadata: {labels: {app: deneme-yuk}}
+    spec:
+      nodeSelector: {type: kwok}
+      tolerations:
+        - {key: kwok.x-k8s.io/node, operator: Exists, effect: NoSchedule}
+      containers:
+        - name: is
+          image: sahte-imaj               # KWOK imajı indirmez; isim önemsiz
+          resources:
+            requests: {cpu: "1", memory: 1Gi}

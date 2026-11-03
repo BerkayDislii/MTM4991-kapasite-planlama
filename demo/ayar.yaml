@@ -1,0 +1,26 @@
+# Kubernetes kapasite planlama demosu — ayarlar.
+# Komut satırı seçenekleri (python -m demo.calistir --yardim) bu değerlerin üzerine yazar.
+
+havuz: bitbrains_fastStorage   # data/processed/pool_<havuz>.parquet ve pool5_<havuz>.parquet
+model: sarima                  # outputs/forecasts/<veri_seti>/<havuz>/<model>/forecast_<gün>.parquet
+strateji: r2_uyumlu            # ilp: yalnız tahmine dayalı ILP · r2_uyumlu: ILP + plana uyumlu eşikli tampon
+bas_gun: 25                    # İlk canlı gün (fastStorage'da test dönemi 24–29. günler). 25. gün test döneminin
+                               # en hareketli günü: yalnız ILP 12 saat, ILP + tampon 6 saat eksik kalır (gösterim için)
+gun_sayisi: 1                  # Kaç gün canlandırılacak (tüm test dönemi için 6)
+canli_ilp: true                # true: her gün başında ILP canlı çözülür · false: kayıtlı plan okunur
+
+# Talep, sabit boyutlu "birim pod"lara bölünür. Birimler her sunucu tipinin kapasitesine tam bölünmeli
+# (4 çekirdek ve 8/16/32 GiB): böylece pod yerleştirmesinde parçalanma olmaz ve "yer bulamayan pod var"
+# ancak ve ancak "talep > kapasite" olduğunda gerçekleşir (raporun eksik kapasite tanımıyla birebir).
+birim:
+  cpu: 2                       # işlemci pod'u: 2 çekirdek ister
+  mem_gib: 4                   # bellek pod'u: 4 GiB ister
+
+hiz:
+  saat_saniye: 15              # 1 benzetim saati = 15 gerçek saniye (12 adım × 1,25 s); bir gün ≈ 6 dakika
+
+kume:
+  ad_alani: kapasite-demo      # Demo pod'larının namespace'i
+  yerlesme_zaman_asimi_s: 30   # Bir adımda pod'ların yerleşmesi için en fazla bekleme
+
+cikti: demo/cikti              # adim.csv, saat.csv, durum.json (panel bunları okur)

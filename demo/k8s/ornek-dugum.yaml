@@ -1,0 +1,21 @@
+# Sahte (KWOK) düğüm: c8i.xlarge karşılığı — 4 çekirdek, 8 GiB bellek.
+# Gerçek bir makine yok; KWOK bu düğümü "hazır" gösterir, zamanlayıcı da gerçekmiş gibi pod yerleştirir.
+apiVersion: v1
+kind: Node
+metadata:
+  name: c8i-0001
+  annotations:
+    kwok.x-k8s.io/node: fake          # KWOK'a "bu düğümü sen yönet" der
+    kapasite.ytu/fiyat-usd-saat: "0.21388"
+  labels:
+    type: kwok                        # demo pod'ları yalnız bu etiketli düğümlere gider
+    node.kubernetes.io/instance-type: c8i.xlarge
+    kubernetes.io/hostname: c8i-0001
+spec:
+  taints:                             # sıradan pod'lar sahte düğüme düşmesin
+    - key: kwok.x-k8s.io/node
+      value: fake
+      effect: NoSchedule
+status:
+  allocatable: {cpu: "4", memory: 8Gi, pods: "110"}
+  capacity:    {cpu: "4", memory: 8Gi, pods: "110"}

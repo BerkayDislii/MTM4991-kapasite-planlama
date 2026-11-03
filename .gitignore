@@ -10,3 +10,4 @@ node_modules/
 # demo: yerel küme dosyaları
 demo/.kube/
 demo/bin/
+demo/cikti*/
