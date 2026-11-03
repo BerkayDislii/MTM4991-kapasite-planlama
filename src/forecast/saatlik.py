@@ -40,8 +40,8 @@ def sarima_secimi(h: Havuz) -> dict[int, dict]:
     return out
 
 
-def sarima_kokenler(h: Havuz, y_seri: np.ndarray, kokenler: list[int]) -> np.ndarray:
-    """SARIMA ile köken başına 24 saat ileri tahmin: (n_koken, 24, 2).
+def sarima_kokenler(h: Havuz, y_seri: np.ndarray, kokenler: list[int], se_dondur: bool = False):
+    """SARIMA ile köken başına 24 saat ileri tahmin: (n_koken, 24, 2). se_dondur=True ise (ortalama, standart hata).
 
     y_seri: durumun ilerletileceği (gerçek ya da bozulmuş) saatlik seri; parametreler her zaman bozulmamış
     gerçek seriden uydurulur. Kökenin bulunduğu bölüm uydurma verisini belirler (val → eğitim, test → eğitim+val).
@@ -52,6 +52,7 @@ def sarima_kokenler(h: Havuz, y_seri: np.ndarray, kokenler: list[int]) -> np.nda
     t_son, v_son = h.sinir["train"][1], h.sinir["val"][1]
     secim = sarima_secimi(h)
     out = np.zeros((len(kokenler), UFUK, 2))
+    se = np.zeros((len(kokenler), UFUK, 2))
     for j in (0, 1):
         olcek = float(y0[:t_son, j].mean())
         order, sorder = ast.literal_eval(secim[j]["order"]), ast.literal_eval(secim[j]["seasonal_order"])
@@ -64,9 +65,11 @@ def sarima_kokenler(h: Havuz, y_seri: np.ndarray, kokenler: list[int]) -> np.nda
                 assert res is not None, f"{h.ad}/{j}: SARIMA uydurulamadı"
                 uyum[ad] = res.apply(y_seri[:, j] / olcek)        # durum tüm seri boyunca, parametreler sabit
         for i, o in enumerate(kokenler):
-            r = uyum[donem[i]]
-            out[i, :, j] = r.get_prediction(start=o, end=o + UFUK - 1, dynamic=True).predicted_mean * olcek
-    return out
+            tah = uyum[donem[i]].get_prediction(start=o, end=o + UFUK - 1, dynamic=True)
+            out[i, :, j] = tah.predicted_mean * olcek
+            if se_dondur:
+                se[i, :, j] = tah.se_mean * olcek
+    return (out, se) if se_dondur else out
 
 
 def naif_kokenler(model: str, y_seri: np.ndarray, kokenler: list[int]) -> np.ndarray:
