@@ -11,3 +11,4 @@ node_modules/
 demo/.kube/
 demo/bin/
 demo/cikti*/
+Claude outputs/
