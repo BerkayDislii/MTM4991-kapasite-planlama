@@ -1,0 +1,21 @@
+# Keşifsel analiz parametreleri (MIMARI.md Bölüm 10).
+# Mevsimsellik, durağanlık ve tahmin tabanı analizleri yalnızca eğitim (ve naif taban için doğrulama)
+# döneminde yapılır; test dönemi model/parametre seçimine sızmaz (Bölüm 0, kural 4).
+
+season_hours: 24
+acf_lags: 72                      # 3 gün
+significance: 0.05                # ADF / KPSS anlamlılık düzeyi
+stl:
+  period: 24
+  robust: true
+periodogram_top_k: 3
+vm_acf:
+  lag_steps: 288                  # 1 gün = 288 x 5 dk
+  min_days: 2                     # eğitimde en az 2 günü olan VM'ler
+reference_gb_per_core: [2, 4, 8]  # Bölüm 4.2: AWS c / m / r ailelerinin tipik GB/çekirdek oranları
+figure_pools: [bitbrains_fastStorage, bitbrains_rnd]
+figure:
+  width_in: 6.3
+  height_in: 3.4
+  dpi: 300
+  font: Liberation Serif

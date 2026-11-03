@@ -1,0 +1,11 @@
+senaryo,veri_seti,baslangic_dilim,tur,carpan,sure_saat,min_etki_saat,kayma_saat
+kontrol,bitbrains,,yok,,,,
+kontrol,alibaba,,yok,,,,
+basamak,bitbrains,657,carpan,1.5,,12,
+basamak,alibaba,131,carpan,1.5,,12,
+darbe,bitbrains,621,carpan,2.0,3,,
+darbe,alibaba,121,carpan,2.0,3,,
+dusus,bitbrains,649,carpan,0.5,,12,
+dusus,alibaba,132,carpan,0.5,,12,
+mevsim_kayma,bitbrains,,kayma,,,,12
+mevsim_kayma,alibaba,,kayma,,,,12

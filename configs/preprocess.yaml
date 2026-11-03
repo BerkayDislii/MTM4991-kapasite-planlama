@@ -1,0 +1,64 @@
+# Ön işleme parametreleri (MIMARI.md Bölüm 4). "VARSAYILAN" değerler kullanıcı tarafından değiştirilebilir.
+
+grid:
+  step_seconds: 300            # 5 dakikalık ortak ızgara
+  steps_per_slot: 12           # 1 saatlik dilim = 12 adım
+
+gaps:
+  max_gap_steps: 3             # VARSAYILAN: <= 3 adımlık (15 dk) iç boşluklar doğrusal enterpole edilir
+  max_long_gap_ratio: 0.01     # Uzun boşluk hücre oranı bunu aşarsa DUR (Bölüm 4.3)
+
+timestamp_unit:
+  rel_tolerance: 0.10          # Ardışık fark medyanı adımın ±%10'u içinde olmalı
+
+bitbrains:
+  raw_dir: data/raw/bitbrains
+  separator: ";"               # Başlık ve satırlarda ";" sonrası sekme var, strip ile temizlenir
+  # Kullanıcı kararı (2026-10-29): Rnd için yalnızca 2013-8 ayı kullanılır, aylar birleştirilmez.
+  datasets:
+    fastStorage: fastStorage/2013-8
+    rnd: rnd/2013-8
+  # Kullanıcı kararı: CPU cores = 0 (kapasite = 0) satırları geçersiz -> NaN (CPU ve bellek).
+  zero_capacity_policy: nan
+  # Kullanıcı kararı: CPU usage > provisioned capacity satırları kırpılmaz.
+  clip_usage_to_capacity: false
+  # Kullanıcı kararı: dilim 0 = veri setindeki ilk 5 dk hücresi (göreli zaman).
+  # Kullanıcı kararı (2026-10-29): yaşam süresi = ilk/son geçerli ölçüm; uçlardaki cores=0 dönemi "VM yok" (talep 0).
+  lifetime: first_last_valid
+  slot_origin: relative
+  split_days:                  # Kronolojik bölme (Bölüm 4.6)
+    train: 20
+    val: 4
+    test: 6
+
+alibaba:
+  raw_dir: data/raw/alibaba
+  # cluster-trace-v2018 şeması (başlıksız CSV, sütun sırası); okumada sütun sayısı assert ile doğrulanır
+  machine_usage:
+    file: machine_usage.csv
+    columns: [machine_id, time_stamp, cpu_util_percent, mem_util_percent, mem_gps, mkpi, net_in, net_out, disk_io_percent]
+  machine_meta:
+    file: machine_meta.csv
+    columns: [machine_id, time_stamp, failure_domain_1, failure_domain_2, cpu_num, mem_size, status]
+  container_meta:
+    file: container_meta.csv
+    columns: [container_id, machine_id, time_stamp, app_du, status, cpu_request, cpu_limit, mem_size]
+  # Bölüm 4.2: yüzde değerleri [0, 100] dışında (ör. -1, 101) ise geçersiz -> NaN
+  util_valid_range: [0, 100]
+  # Bölüm 4.2: M_ref = cpu_num × r  (r: GB/çekirdek). Merkez 4 (VARSAYILAN), duyarlılık ızgarası {2, 4, 8}
+  r_center: 4
+  r_grid: [2, 4, 8]
+  # Örnekleme aralığı doğrulaması için rastgele seçilen makine sayısı (tohumlu)
+  sampling_check_machines: 200
+  sampling_check_seed: 42
+  expected_days: 8            # Bölüm 3: 8 günlük iz; time_stamp saniye birimi bununla doğrulanır
+  # Bitbrains ile aynı kurallar: yaşam süresi = ilk/son geçerli ölçüm, dilim 0 = ilk 5 dk hücresi (göreli)
+  lifetime: first_last_valid
+  slot_origin: relative
+  # Kullanıcı kararı (2026-10-29, M3): 0–1. günler veri kalitesi nedeniyle atılır (ilk ~45 saat seyrek + kesinti).
+  # Analiz penceresi start_day'in ilk hücresinden başlar; dilim 0 = bu günün ilk saati.
+  start_day: 2
+  split_days:                  # Kronolojik bölme (Bölüm 4.6), kullanıcı kararı 2026-10-29: 4 / 1 / 1
+    train: 4
+    val: 1
+    test: 1

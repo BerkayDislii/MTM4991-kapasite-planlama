@@ -1,0 +1,16 @@
+# Havuz tanımları (MIMARI.md Bölüm 4.5). Üyelikler bu tanımlardan deterministik üretilir ve
+# data/processed/pool_members.json dosyasına yazılır.
+
+bitbrains:
+  # Doğal havuzlar: veri setinin tüm VM'leri (fastStorage ve rnd asla karıştırılmaz)
+  natural: [fastStorage, rnd]
+  # fastStorage'dan sabit tohumla rastgele ayrık alt havuzlar
+  subpools:
+    source: fastStorage
+    seed: 42                   # VARSAYILAN
+    n_pools: 5                 # VARSAYILAN: 1250 VM -> 5 x 250 VM
+
+alibaba:
+  # Sabit tohumla rastgele ayrık makine havuzları (Bölüm 4.5). Artan makineler hiçbir havuza girmez.
+  seed: 42                     # VARSAYILAN
+  pool_size: 500               # VARSAYILAN

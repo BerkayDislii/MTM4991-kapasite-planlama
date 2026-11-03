@@ -1,0 +1,65 @@
+# Tahmin modelleri parametreleri (MIMARI.md Bölüm 5). "VARSAYILAN" değerler kullanıcı tarafından değiştirilebilir.
+# Bölmeler configs/preprocess.yaml split_days'ten okunur; test dönemi hiçbir seçimde kullanılmaz (Bölüm 0, kural 4).
+
+horizon_hours: 24             # Gün-ileri ufuk (Bölüm 5.1)
+season_hours: 24              # Mevsimsel naif ve SARIMA mevsim uzunluğu
+targets: [cpu, mem]           # Hedef sütunlar: <k>_peak
+
+# Değerlendirme: her gün başı bir köken (walk-forward). Eğitim ölçütleri, tüm modeller için ortak olacak şekilde
+# en uzun bakış penceresinin (LSTM lookback) dolduğu ilk günden başlar (veri setine göre lookback'ten türetilir).
+datasets:
+  bitbrains:
+    pools: [bitbrains_fastStorage, bitbrains_rnd, bitbrains_fastStorage_s0, bitbrains_fastStorage_s1,
+            bitbrains_fastStorage_s2, bitbrains_fastStorage_s3, bitbrains_fastStorage_s4]
+    lookback_hours: 48        # VARSAYILAN (Bölüm 5.2)
+  alibaba:
+    # Havuz adları alibaba_p<i>_r<r> olarak pools.yaml / preprocess.yaml r_grid'den üretilir
+    lookback_hours: 24        # VARSAYILAN, kullanıcı talebi (2026-10-29, M4): 96 saatlik eğitimde 48 sa yerine 24 sa
+                              # (eğitim kökeni 25 -> 49)
+
+# Özet tablo grupları: havuzlar üzerinden ortalama ± std (Bölüm 4.5)
+summary_groups:
+  bitbrains_fastStorage: [bitbrains_fastStorage]
+  bitbrains_rnd: [bitbrains_rnd]
+  bitbrains_fastStorage_alt: [bitbrains_fastStorage_s0, bitbrains_fastStorage_s1, bitbrains_fastStorage_s2,
+                              bitbrains_fastStorage_s3, bitbrains_fastStorage_s4]
+  # alibaba_r<r>: alibaba_p*_r<r> (kodda üretilir)
+
+sarima:
+  # Durağanlık (yalnız eğitim dönemi): ADF (H0: birim kök) ve KPSS (H0: durağan).
+  # d = 0 yalnızca ADF reddeder VE KPSS reddetmezse; aksi hâlde 1. farkta tekrar test edilir (en fazla max_d).
+  significance: 0.05
+  max_d: 1
+  # Mevsimsel fark D: STL mevsimsellik gücü (Wang-Smith-Hyndman F_s, eğitim dönemi) >= eşik ise D = 1.
+  seasonal_strength_D1: 0.64  # VARSAYILAN (forecast::nsdiffs ile aynı eşik)
+  # Aday ızgarası. Mevsimsel olmayan aile: P = D = Q = 0. Mevsimsel aile: (P, Q) != (0, 0).
+  # Kullanıcı kararı (2026-10-29, M4): aynı (d, D) ailesi içinde AIC; mevsimsel / mevsimsel olmayan aile
+  # kazananları arasında nihai seçim doğrulama dönemi gün-ileri MAE'sine göre.
+  p: [0, 1, 2]
+  q: [0, 1, 2]
+  P: [0, 1]
+  Q: [0, 1]
+  maxiter: 200
+  n_jobs: 14                  # Paralel süreç sayısı (16 çekirdek)
+
+lstm:
+  seeds: [0, 1, 2]            # Bölüm 5.2: 3 tohum, ortalama ± std
+  input_resolution_steps: 1   # 5 dk ızgarası (Bölüm 5.2); değiştirmek bir SAPMADIR
+  hidden_size: 64             # VARSAYILAN
+  num_layers: 2               # VARSAYILAN
+  dropout: 0.1                # VARSAYILAN
+  lr: 0.001                   # VARSAYILAN
+  weight_decay: 0.0
+  batch_size: 32
+  max_epochs: 300
+  patience: 30                # Erken durdurma (doğrulama kaybı)
+  min_epochs: 10
+  amp: true                   # torch.autocast float16
+  # Son model: eğitim+doğrulama ile, 1. aşamada erken durdurmanın bulduğu epoch sayısı kadar yeniden eğitilir
+  # (Bölüm 5.1: "eğitim+doğrulama ile bir kez eğitilir"); ölçekleyici de eğitim+doğrulamaya uydurulur.
+  refit_on_train_val: true
+
+outputs:
+  forecasts_dir: outputs/forecasts   # Bölüm 5.4 sözleşmesi: <dataset>/<pool>/<model>/forecast_<gün>.parquet
+  models_dir: outputs/models         # Ölçüt tabloları, model seçimi, eğitim günlükleri
+  write_forecast_splits: [val, test]

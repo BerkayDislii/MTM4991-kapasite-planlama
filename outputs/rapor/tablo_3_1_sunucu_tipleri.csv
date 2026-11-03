@@ -1,0 +1,4 @@
+Tip,Aile,vCPU (çekirdek),Bellek (GiB),GB/vCPU,Saatlik maliyet (USD)
+c8i.xlarge,Hesaplama optimize,4,8,2,"0,21388"
+m8i.xlarge,Genel amaçlı,4,16,4,"0,25358"
+r8i.xlarge,Bellek optimize,4,32,8,"0,33516"

@@ -1,0 +1,11 @@
+Veri seti,Senaryo,İşlemci: SARIMA (P1),İşlemci: LSTM (P2),İşlemci: Mevsimsel naif (P0),İşlemci: Son değer (P0),Bellek: SARIMA (P1),Bellek: LSTM (P2),Bellek: Mevsimsel naif (P0),Bellek: Son değer (P0)
+Bitbrains,Kontrol (bozulmasız),"0,72","0,97","0,84","0,55","0,98","1,00","1,14","1,70"
+Bitbrains,"Basamak (×1,5)","0,69","0,95","0,94","0,63","1,04","1,09","1,33","2,08"
+Bitbrains,"Darbe (×2, 3 sa)","0,91","1,02","0,93","0,94","1,21","1,11","1,33","2,55"
+Bitbrains,"Ani düşüş (×0,5)","0,90","1,07","0,80","0,57","1,09","1,12","1,05","1,43"
+Bitbrains,Mevsimsellik bozulması (12 sa kayma),"0,73","0,77","0,79","0,65","0,88","0,90","1,15","1,04"
+Alibaba,Kontrol (bozulmasız),"1,40","1,89","1,14","2,96","2,31","1,64","2,28","3,80"
+Alibaba,"Basamak (×1,5)","3,87","3,90","3,46","5,44","21,05","20,39","21,02","22,54"
+Alibaba,"Darbe (×2, 3 sa)","2,41","2,81","2,12","3,97","10,84","10,17","10,80","12,32"
+Alibaba,"Ani düşüş (×0,5)","1,88","2,68","2,00","2,69","17,01","17,09","16,75","16,80"
+Alibaba,Mevsimsellik bozulması (12 sa kayma),"2,68","2,59","2,65","2,33","1,21","1,06","1,58","2,39"

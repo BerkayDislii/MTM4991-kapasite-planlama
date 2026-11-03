@@ -1,0 +1,8 @@
+havuz,oran_medyan,oran_p5,oran_p95,bellek_baglayici_orani_r2,bellek_baglayici_orani_r4,bellek_baglayici_orani_r8
+bitbrains_fastStorage,1.202,0.804,2.431,0.0917,0.0,0.0
+bitbrains_rnd,1.512,0.932,3.3,0.2854,0.0021,0.0
+bitbrains_fastStorage_s0,1.222,0.789,2.265,0.0875,0.0,0.0
+bitbrains_fastStorage_s1,1.23,0.812,2.443,0.1167,0.0042,0.0
+bitbrains_fastStorage_s2,1.086,0.737,2.175,0.0688,0.0021,0.0
+bitbrains_fastStorage_s3,1.282,0.828,2.711,0.1292,0.0021,0.0
+bitbrains_fastStorage_s4,1.285,0.85,2.81,0.1333,0.0021,0.0

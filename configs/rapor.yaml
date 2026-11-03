@@ -1,0 +1,104 @@
+# M8 rapor çıktıları (MIMARI.md Bölüm 9 ve 13). Ajan Word dosyası üretmez; PNG/CSV + katalog üretir.
+# Numaralar bu listedeki sıradan bölüm başına otomatik verilir (Şekil 4.1, 4.2 ...; Tablo 4.1 ...). Sırayı değiştirmek
+# ya da bir öğeyi çıkarmak numaraları yeniden üretir. Bölüm/alt başlık adları Tasarim_Uygulamasi_Rapor_Sablonu.docx'ten.
+# Altyazılar ÖNERİDİR (şablonda tablo başlığı tablonun üstüne, şekil başlığı şeklin altına yazılır).
+
+dizin: outputs/rapor
+ondalik: ","                   # Türkçe ondalık ayırıcı (tablo hücreleri ve eksen etiketleri)
+
+katalog:
+  - {bolum: 3, alt: "Kapasite Planlama Modeli", tur: tablo, id: sunucu_tipleri,
+     baslik: "Sunucu tipleri ve özellikleri (AWS EC2 on-demand, Linux, eu-central-1)"}
+  - {bolum: 4, alt: "Tahmin Sonuçları", tur: tablo, id: tahmin_olcutleri,
+     baslik: "Test dönemi gün-ileri tahmin ölçütleri (havuzlar üzerinden ortalama ± standart sapma)"}
+  - {bolum: 4, alt: "Tahmin Sonuçları", tur: tablo, id: sarima_secim,
+     baslik: "Bitbrains havuzlarında seçilen SARIMA modelleri"}
+  - {bolum: 4, alt: "Tahmin Sonuçları", tur: sekil, id: tahmin_bitbrains,
+     baslik: "Bitbrains fastStorage havuzunda test dönemi gerçek ve tahmin edilen saatlik tepe talep"}
+  - {bolum: 4, alt: "Tahmin Sonuçları", tur: sekil, id: tahmin_alibaba,
+     baslik: "Alibaba havuzunda (p0, r = 4) doğrulama ve test günlerinde gerçek ve tahmin edilen saatlik tepe talep",
+     not: "Alibaba'da test dönemi tek gündür; bağlam için doğrulama günü de gösterilmiştir."}
+  - {bolum: 4, alt: "Kapasite Planlama Sonuçları", tur: sekil, id: ilp_plan,
+     baslik: "Bitbrains fastStorage havuzunda SARIMA tahminine dayalı ILP planı: sunucu sayıları ile kapasite ve gerçek talep",
+     not: "İşlemci bağlayıcı kaynak olduğundan işlemci panelinde (1 + α) × tahmin çizgisi ILP kapasitesiyle çakışır. Gri alanlar gerçek talebin kapasiteyi aştığı dilimlerdir."}
+  - {bolum: 4, alt: "Kapasite Planlama Sonuçları", tur: tablo, id: ilp_sonuclari,
+     baslik: "Tahmine dayalı ILP ve kahin ILP sonuçları (test dönemi, α = 0,05, w = 0,25, L = 2)",
+     not: "Alibaba'da negatif regret, tahminin düşük kalması nedeniyle eksik kapasite pahasına elde edilir; eksik saat sütunuyla birlikte okunmalıdır."}
+  - {bolum: 4, alt: "Kapasite Planlama Sonuçları", tur: tablo, id: lp_yuvarlama,
+     baslik: "ILP ile LP gevşetmesi ve yukarı yuvarlama çözümlerinin karşılaştırılması"}
+  - {bolum: 4, alt: "Kapasite Planlama Sonuçları", tur: tablo, id: alfa_duyarlilik,
+     baslik: "Güvenlik payı α'nın SARIMA tabanlı ILP sonuçlarına etkisi (w = 0,25, L = 2)"}
+  - {bolum: 4, alt: "Kapasite Planlama Sonuçları", tur: tablo, id: w_L_etkisi,
+     baslik: "Açma maliyeti (w) ve minimum çalışma süresinin (L) SARIMA tabanlı ILP'de açılış sayısına etkisi (α = 0,05)"}
+  - {bolum: 4, alt: "Otomatik Ölçeklendirme ile Karşılaştırma", tur: tablo, id: karsilastirma_bitbrains,
+     baslik: "Bitbrains veri setinde stratejilerin karşılaştırılması (test dönemi)"}
+  - {bolum: 4, alt: "Otomatik Ölçeklendirme ile Karşılaştırma", tur: tablo, id: karsilastirma_alibaba,
+     baslik: "Alibaba veri setinde stratejilerin karşılaştırılması (test günü; M_ref varsayımına bağlı)"}
+  - {bolum: 4, alt: "Otomatik Ölçeklendirme ile Karşılaştırma", tur: sekil, id: karsilastirma_zaman,
+     baslik: "Bitbrains fastStorage havuzunda stratejilerin işlemci kapasitesi ve gerçek talep",
+     not: "R2 tamponunun sıfır olduğu dilimlerde R2 çizgisi ILP çizgisiyle çakışır. Gösterilen aralık test döneminin ilk iki günüdür."}
+  - {bolum: 4, alt: "Otomatik Ölçeklendirme ile Karşılaştırma", tur: sekil, id: maliyet_yetersizlik,
+     baslik: "Maliyet–yetersizlik eğrisi: güvenlik payı α değiştikçe alt sınıra göre regret ve eksik kapasiteli saat oranı (w = 0,25, L = 2)",
+     not: "Her eğride noktalar α = 0; 0,05; 0,10; 0,20 sırasıyla sağ alttan sol üste ilerler (α etiketleri ilk panelde). R1 α'dan bağımsızdır (tek nokta). Regret, aynı w ve L için α = 0 kahin maliyetine göredir."}
+  - {bolum: 4, alt: "Kontrollü Sentetik Senaryolar", tur: tablo, id: sentetik_ozet,
+     baslik: "Sentetik senaryolarda stratejilerin regret ve eksik kapasiteli saat oranı (SENTETİK)"}
+  - {bolum: 4, alt: "Kontrollü Sentetik Senaryolar", tur: tablo, id: sentetik_tahmin,
+     baslik: "Sentetik senaryolarda test dönemi tahmin hatası, MASE (SENTETİK)"}
+  - {bolum: 4, alt: "Kontrollü Sentetik Senaryolar", tur: sekil, id: sentetik_zaman,
+     baslik: "Bitbrains fastStorage havuzunda basamak ve darbe senaryolarında işlemci kapasitesi ve bozulmuş talep (SENTETİK)",
+     not: "Dikey çizgi bozulmanın başladığı saattir. R2 tamponunun sıfır olduğu dilimlerde R2 çizgisi ILP çizgisiyle çakışır. Sentetik sonuçlar gerçek veri sonuçlarından ayrıdır."}
+
+# Şekil parametreleri
+sekil:
+  tahmin_havuz_bitbrains: bitbrains_fastStorage
+  tahmin_havuz_alibaba: alibaba_p0_r4
+  tahmin_modeller: [sarima, lstm_s0, mevsimsel_naif]
+  plan_havuz: bitbrains_fastStorage
+  plan_model: sarima
+  karsilastirma_havuz: bitbrains_fastStorage
+  karsilastirma_gunler: [24, 25]           # gösterilen test günleri (dilim = 24·gün)
+  karsilastirma_stratejiler: [ilp_sarima, r0_tepkisel_ilp, r1_esik, r2_hibrit_uyumlu_sarima]
+  egri_gruplar: [bitbrains_fastStorage, bitbrains_rnd, alibaba_r4, alibaba_r8]
+  sentetik_havuz: bitbrains_fastStorage
+  sentetik_senaryolar: [basamak, darbe]
+  sentetik_pencere_saat: [-24, 30]         # başlangıç dilimine göre gösterilen aralık
+  sentetik_stratejiler: [ilp_sarima, r0_tepkisel_ilp, r2_hibrit_uyumlu_sarima]
+
+# Renkler: dataviz referans paleti, ilk 5 kategorik slot (validate_palette.js ile beyaz yüzeyde doğrulandı;
+# kontrast < 3:1 olan slotlar için lejant + farklı çizgi stili kullanılır). Kimlik sabit: aynı strateji/model her
+# şekilde aynı renk ve çizgi stiliyle çizilir.
+renk:
+  murekkep: "#1f1f1e"
+  kategorik: ["#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4"]
+  strateji: {ilp: 0, r0_tepkisel_ilp: 1, r1_esik: 2, r2_hibrit: 3, r2_hibrit_uyumlu: 4}
+  model: {sarima: 0, lstm: 1, mevsimsel_naif: 2, son_deger: 3}
+  tip: {c8i.xlarge: 0, m8i.xlarge: 1, r8i.xlarge: 2}
+cizgi: {0: "-", 1: "--", 2: "-.", 3: ":", 4: [0, [5, 1.5, 1, 1.5]]}   # 4: özel kesik-nokta deseni (ofset, [çizgi, boşluk, ...])
+
+# Görünen adlar
+ad:
+  grup:
+    bitbrains_fastStorage: "Bitbrains fastStorage"
+    bitbrains_rnd: "Bitbrains Rnd"
+    bitbrains_fastStorage_alt: "Bitbrains fastStorage alt havuzları"
+    alibaba_r2: "Alibaba (r = 2)"
+    alibaba_r4: "Alibaba (r = 4)"
+    alibaba_r8: "Alibaba (r = 8)"
+  model:
+    son_deger: "Son değer (P0)"
+    mevsimsel_naif: "Mevsimsel naif (P0)"
+    sarima: "SARIMA (P1)"
+    lstm: "LSTM (P2)"
+    kahin: "—"
+    "-": "—"
+  strateji:
+    kahin: "Kahin ILP"
+    ilp: "Tahmine dayalı ILP"
+    r0_tepkisel_ilp: "R0 Tepkisel-ILP"
+    r1_esik: "R1 Eşik kuralı"
+    r2_hibrit: "R2 Hibrit (HPA eşikleri)"
+    r2_hibrit_uyumlu: "R2 Hibrit (uyumlu eşikler)"
+  kaynak: {cpu: "İşlemci", mem: "Bellek"}
+  senaryo: {kontrol: "Kontrol (bozulmasız)", basamak: "Basamak (×1,5)", darbe: "Darbe (×2, 3 sa)",
+            dusus: "Ani düşüş (×0,5)", mevsim_kayma: "Mevsimsellik bozulması (12 sa kayma)"}
+  veri_seti: {bitbrains: "Bitbrains", alibaba: "Alibaba"}

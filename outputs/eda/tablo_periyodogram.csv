@@ -1,0 +1,13 @@
+havuz,kaynak,sira,periyot_saat,guc_payi
+bitbrains_fastStorage,cpu,1,80.0,0.1717
+bitbrains_fastStorage,cpu,2,240.0,0.12
+bitbrains_fastStorage,cpu,3,120.0,0.1076
+bitbrains_fastStorage,mem,1,80.0,0.161
+bitbrains_fastStorage,mem,2,120.0,0.097
+bitbrains_fastStorage,mem,3,160.0,0.0595
+bitbrains_rnd,cpu,1,80.0,0.1564
+bitbrains_rnd,cpu,2,96.0,0.1497
+bitbrains_rnd,cpu,3,120.0,0.0779
+bitbrains_rnd,mem,1,96.0,0.1354
+bitbrains_rnd,mem,2,80.0,0.0663
+bitbrains_rnd,mem,3,160.0,0.0625

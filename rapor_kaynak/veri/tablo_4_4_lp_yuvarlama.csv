@@ -1,0 +1,3 @@
+Veri seti,Çözüm sayısı,Yuvarlanmış plan (5)'e uygun (%),"Yuvarlama maliyet farkı, ort. (%)","Yuvarlama maliyet farkı, en büyük (%)","LP alt sınır boşluğu, ort. (%)","ILP çözüm süresi, ort. (s)","ILP çözüm süresi, en büyük (s)"
+Alibaba,336,"100,0","0,005","0,03","0,009","0,023","0,04"
+Bitbrains,490,"100,0","0,402","12,90","1,273","0,038","0,49"

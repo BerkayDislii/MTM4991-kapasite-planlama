@@ -1,0 +1,15 @@
+havuz,kaynak,mevsimsellik_gucu,trend_gucu,mevsimsel_genlik,seri_ortalama
+bitbrains_fastStorage,cpu,0.2465,0.5754,958.553,699.259
+bitbrains_fastStorage,mem,0.1834,0.4553,1273.327,831.63
+bitbrains_rnd,cpu,0.253,0.6826,234.981,200.617
+bitbrains_rnd,mem,0.2031,0.4183,484.828,295.103
+bitbrains_fastStorage_s0,cpu,0.2424,0.5676,163.388,130.107
+bitbrains_fastStorage_s0,mem,0.2192,0.5084,174.856,156.082
+bitbrains_fastStorage_s1,cpu,0.1983,0.5561,210.004,155.11
+bitbrains_fastStorage_s1,mem,0.1634,0.4379,272.979,188.746
+bitbrains_fastStorage_s2,cpu,0.2424,0.5817,179.862,150.09
+bitbrains_fastStorage_s2,mem,0.2088,0.4432,298.086,166.626
+bitbrains_fastStorage_s3,cpu,0.2535,0.559,206.01,156.958
+bitbrains_fastStorage_s3,mem,0.1822,0.4102,275.654,195.922
+bitbrains_fastStorage_s4,cpu,0.2103,0.5326,156.138,110.997
+bitbrains_fastStorage_s4,mem,0.1569,0.4592,153.625,141.921

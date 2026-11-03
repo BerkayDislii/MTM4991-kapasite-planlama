@@ -1,0 +1,12 @@
+data/
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+node_modules/
+*.tar.gz
+~$*
+.~lock.*
+# demo: yerel küme dosyaları
+demo/.kube/
+demo/bin/

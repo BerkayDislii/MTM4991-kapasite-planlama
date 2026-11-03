@@ -1,0 +1,34 @@
+# OTOMATİK ÜRETİLDİ: src/ilp/fiyat_cek.py (elle düzenleme). MIMARI.md Bölüm 6.4.
+kaynak: https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonEC2/current/eu-central-1/index.csv
+bolge: eu-central-1
+yayin_tarihi: '2026-10-28T18:03:52Z'
+cekilme_tarihi: '2026-10-29'
+fiyat: on-demand, Linux, paylaşımlı, USD/saat
+tipler:
+- ad: c8i.xlarge
+  aile: Compute optimized
+  vcpu: 4
+  bellek_gib: 8.0
+  gb_per_vcpu: 2.0
+  saatlik_usd: 0.21388
+  islemci: Intel Xeon Scalable (Granite Rapids)
+  sku: 246MJYXMPXK7NK39
+  gecerlilik: '2026-10-01'
+- ad: m8i.xlarge
+  aile: General purpose
+  vcpu: 4
+  bellek_gib: 16.0
+  gb_per_vcpu: 4.0
+  saatlik_usd: 0.25358
+  islemci: Intel Xeon Scalable (Granite Rapids)
+  sku: 2W64ZGBDH2KJDB7W
+  gecerlilik: '2026-10-01'
+- ad: r8i.xlarge
+  aile: Memory optimized
+  vcpu: 4
+  bellek_gib: 32.0
+  gb_per_vcpu: 8.0
+  saatlik_usd: 0.33516
+  islemci: Intel Xeon Scalable (Granite Rapids)
+  sku: HY9TXGC5YPH8MR5Q
+  gecerlilik: '2026-10-01'

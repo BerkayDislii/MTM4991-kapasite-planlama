@@ -1,0 +1,5 @@
+veri_seti,kaynak,vm_sayisi,sabit_seri_vm,vm_r_medyan,vm_r_p25,vm_r_p75,vm_r_gt_0_5_orani,toplam_r
+fastStorage,cpu_cores,1171,12,0.0959,0.0203,0.38,0.1682,0.1193
+rnd,cpu_cores,495,4,0.167,0.0266,0.3881,0.1616,0.0558
+fastStorage,mem_gb,1182,1,0.105,0.0358,0.235,0.0846,0.056
+rnd,mem_gb,499,0,0.1284,0.0336,0.3513,0.1122,0.0417

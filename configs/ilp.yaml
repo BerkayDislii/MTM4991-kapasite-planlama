@@ -1,0 +1,71 @@
+# ILP kapasite planlama parametreleri (MIMARI.md Bölüm 6). "VARSAYILAN" değerler kullanıcı tarafından değiştirilebilir.
+# Duyarlılık ızgaraları (alpha, w, L) M7'de taranır; M5 ana koşusu aşağıdaki merkez değerlerle yapılır.
+
+sunucu:
+  # Bölüm 6.4: AWS EC2 on-demand Linux; fiyatlar src/ilp/fiyat_cek.py ile çekilip configs/server_types.yaml'a yazılır.
+  bolge: eu-central-1          # VARSAYILAN
+  # Aynı nesil (8i, Intel Granite Rapids), aynı boyut (xlarge = 4 vCPU), farklı GB/vCPU: 2 / 4 / 8
+  # (c / m / r aileleri; Alibaba M_ref ızgarası r ∈ {2, 4, 8} ile birebir). VARSAYILAN.
+  # Not: vCPU, talepteki "çekirdek" ile 1:1 eşlenir (Bitbrains VM çekirdekleri ve Alibaba cpu_num mantıksal CPU'dur).
+  tipler: [c8i.xlarge, m8i.xlarge, r8i.xlarge]
+
+model:
+  horizon_h: 24                # Planlama ufku H (Bölüm 6.1)
+  commit_h: 24                 # Uygulanan dilim sayısı (kayan pencere); şimdilik horizon_h'e eşit olmalı
+  alpha: 0.05                  # VARSAYILAN güvenlik payı (ızgara: 0, 0.05, 0.10, 0.20)
+  w: 0.25                      # VARSAYILAN açma maliyeti s_k = c_k · w (ızgara: 0, 0.25, 0.5, 1)
+  w_kapatma: 0.0               # Kapatma maliyeti d_k = c_k · w_kapatma (VARSAYILAN 0)
+  L: 2                         # VARSAYILAN minimum çalışma süresi (dilim; ızgara: 1, 2, 4), tüm tipler için
+  rho_cpu: 1.0                 # Kullanılabilir kapasite oranı
+  rho_mem: 1.0
+  filo_ust_siniri: null        # İsteğe bağlı x_{k,t} ≤ N_k (VARSAYILAN kapalı)
+
+cozucu:
+  ad: SCIP                     # Bölüm 6.5: pywraplp + SCIP
+  zaman_siniri_s: 60
+  n_jobs: 14                   # Havuzlar paralel çözülür
+
+kayan_pencere:
+  # Isınma: ilk doğrulama gününden soğuk başlangıçla (x0 = 0) başlanır, durum günden güne devredilir;
+  # ölçütler yalnız test günlerinde hesaplanır. Böylece ilk test gününün x0'ı önceki günün planından gelir.
+  isinma_bolumu: val
+  degerlendirme_bolumu: test
+
+degerlendirme:
+  # Bölüm 7: ölçütler GERÇEK talep üzerinden, α payı dahil edilmeden (kapasite = Σ ρ C_k x_{k,t})
+  tolerans: 1.0e-9
+  modeller: [son_deger, mevsimsel_naif, sarima, lstm_s0, lstm_s1, lstm_s2]
+  kahin: true                  # Kahin ILP (gerçek D ile) — regret referansı
+
+outputs:
+  dizin: outputs/ilp           # Kullanıcı talebi (2026-10-29, M5)
+
+tepkisel:
+  # M6 (MIMARI.md Bölüm 7, kullanıcı kararı 2026-10-31). Tüm stratejiler ILP ile aynı maliyet parametrelerini
+  # (s_k = c_k·w, d_k, L_k) kullanır; ısınma/değerlendirme bölümleri kayan_pencere ile aynıdır.
+  # R0: Tepkisel-ILP (ufuk 1, girdi D_{t-1}, α = model.alpha)
+  # R1: eşik kuralı (yalnız olcek_tipi); R2: M5 ILP planı + aynı eşik kuralıyla yönetilen tampon (olcek_tipi)
+  olcek_tipi: m8i.xlarge       # VARSAYILAN (kullanıcı kararı): genel amaçlı, 4 GB/vCPU
+  esik_ust: 0.8                # u_{t-1} > esik_ust ise ölçek büyüt (VARSAYILAN)
+  esik_hedef: 0.7              # büyütme/küçültmede hedef kullanım (VARSAYILAN)
+  esik_alt: 0.5                # u_{t-1} < esik_alt ve soğuma dolmuşsa küçült (VARSAYILAN)
+  soguma: 2                    # son ölçek değişikliğinden sonra küçültme için beklenecek dilim (VARSAYILAN)
+  r1_min_sunucu: 1             # R1 alt sınırı (VARSAYILAN); R2 tamponunun alt sınırı 0 (plan tabanın altına inilmez)
+  hibrit_modeller: [son_deger, mevsimsel_naif, sarima, lstm_s0, lstm_s1, lstm_s2]
+  # R2 iki varyantla raporlanır (kullanıcı kararı 2026-11-01, "c"): r2_hibrit yukarıdaki HPA eşiklerini kullanır;
+  # r2_hibrit_uyumlu ILP planının hedef kullanımına (≈ 1/(1+α)) uyumlu eşikleri kullanır. Gerekçe: planlar ≈ %95
+  # kullanım hedeflediğinden 0,8 eşiği neredeyse her dilimde tetiklenir ve tampon 0,5'in altına inmediği için küçülmez.
+  hibrit_uyumlu:
+    esik_ust: 1.0              # yalnız gerçek talep kapasiteyi aştığında büyüt (VARSAYILAN)
+    esik_hedef: null           # null → 1 / (1 + model.alpha), ILP ile aynı pay (VARSAYILAN)
+    esik_alt: 0.8              # VARSAYILAN
+    soguma: 2                  # VARSAYILAN
+  dizin: outputs/reactive      # Kullanıcı talebi (2026-10-31, M6)
+
+izgara:
+  # M7 duyarlılık ızgarası (MIMARI.md Bölüm 6.3, VARSAYILAN değerler). Kullanıcı kararı (2026-11-01): tam faktöriyel
+  # (48 nokta); her noktada ILP (tüm modeller), kahin, R0, R1, R2 (iki varyant; eşikler sabit, uyumlu hedef 1/(1+α)).
+  alpha: [0.0, 0.05, 0.10, 0.20]
+  w: [0.0, 0.25, 0.5, 1.0]
+  L: [1, 2, 4]
+  dizin: outputs/results/izgara

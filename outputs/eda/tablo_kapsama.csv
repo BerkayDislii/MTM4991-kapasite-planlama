@@ -1,0 +1,3 @@
+veri_seti,vm_sayisi,donem_gun,yasam_gun_min,yasam_gun_medyan,yasam_gun_max,tum_donemi_kapsayan_vm_orani,enterpole_hucre_orani,uzun_bosluk_nan_orani,yasam_disi_atilan_satir
+fastStorage,1250,30.0,0.0,30.0,30.0,0.8008,0.00182,0.00022,1593540
+rnd,500,30.0,0.4,30.0,30.0,0.978,0.00109,0.00089,60298

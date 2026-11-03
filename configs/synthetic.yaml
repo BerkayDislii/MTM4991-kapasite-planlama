@@ -1,0 +1,28 @@
+# M7b sentetik senaryolar (MIMARI.md Bölüm 8). Sonuçlar gerçek veriden AYRI tutulur (outputs/synthetic/).
+# Kullanıcı kararı (2026-11-01): bozulma YALNIZ test dönemine uygulanır; modeller bozulmamış eğitim+doğrulama
+# verisiyle (M4'teki SARIMA derecesi, LSTM en iyi epoch sayısı) yeniden eğitilir ve parametreleri sabit tutularak
+# bozulmuş seride walk-forward tahmin yapılır; ardından ILP, R0, R1, R2 merkez parametrelerle (ilp.yaml model) koşar.
+# Tüm havuzlar. Bozulma 5 dk serisine uygulanır, saatlik tepe yeniden hesaplanır (tepe = saatlik 5 dk maksimumu).
+tohum: 2026
+# Başlangıç saati her (senaryo, veri seti) için tohumla seçilir; aynı veri setinin tüm havuzlarında ortaktır.
+senaryolar:
+  kontrol:                     # bozulma yok: yeniden üretimin M4/M6 ile tutarlılığını ölçer
+    tur: yok
+  basamak:                     # VARSAYILAN: başlangıçtan test sonuna dek ×1,5
+    tur: carpan
+    carpan: 1.5
+    sure_saat: null            # null → test sonuna dek
+    min_etki_saat: 12          # başlangıç, etkinin en az bu kadar sürmesine izin verecek şekilde seçilir
+  darbe:                       # VARSAYILAN: 3 saat ×2
+    tur: carpan
+    carpan: 2.0
+    sure_saat: 3
+  dusus:                       # VARSAYILAN: başlangıçtan test sonuna dek ×0,5
+    tur: carpan
+    carpan: 0.5
+    sure_saat: null
+    min_etki_saat: 12
+  mevsim_kayma:                # VARSAYILAN: test dilimlerinde değer 12 saat öncekiyle değiştirilir (günlük profil kayar)
+    tur: kayma
+    kayma_saat: 12
+dizin: outputs/synthetic
