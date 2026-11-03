@@ -6,7 +6,7 @@ import numpy as np
 import polars as pl
 import pytest
 
-from demo.calistir import kosu
+from demo.calistir import GRUP, Kayit, Kol, kosu
 from demo.cekirdek import ayar_oku, hazirla
 from demo.kume import SahteKume
 from src.common.config import yaml_oku, yol
@@ -18,8 +18,10 @@ SIM = {"ilp": "ilp_sarima", "r2_uyumlu": "r2_hibrit_uyumlu_sarima"}
 def test_kuru_kosu_benzetimle_ayni(strateji, tmp_path):
     ayar = ayar_oku() | {"strateji": strateji, "bas_gun": 24, "gun_sayisi": 6, "canli_ilp": True}
     hz = hazirla(ayar)
-    kosu(hz, SahteKume(hz.tipler, hz.birim), hizli=True, saat_saniye=0, zaman_asimi_s=0, cikti=tmp_path)
-    demo = pl.read_csv(tmp_path / "saat.csv")
+    grup = GRUP[strateji]
+    kol = Kol(grup, hz, SahteKume(hz.tipler, hz.birim), Kayit(tmp_path / grup, hz.tipler.ad))
+    kosu([kol], hizli=True, saat_saniye=0, zaman_asimi_s=0, cikti=tmp_path)
+    demo = pl.read_csv(tmp_path / grup / "saat.csv")
     sim = pl.read_parquet(yol(yaml_oku("ilp")["tepkisel"]["dizin"]) / "sim" / "bitbrains"
                           / ayar["havuz"] / f"{SIM[strateji]}.parquet").filter(pl.col("slot") >= 24 * 24)
     for a in hz.tipler.ad:
@@ -32,7 +34,7 @@ def test_kuru_kosu_benzetimle_ayni(strateji, tmp_path):
 def test_birim_pod_esdegerligi():
     """Yer bulamayan pod var ⇔ talep > kapasite (birim pod kapasitelere tam bölündüğü için)."""
     ayar = ayar_oku()
-    hz = hazirla(ayar | {"bas_gun": 20, "gun_sayisi": 1})
+    hz = hazirla(ayar | {"strateji": "ilp", "bas_gun": 20, "gun_sayisi": 1})
     pod_kap = hz.birim.dugum_pod_kapasitesi(hz.tipler)
     rng = np.random.default_rng(0)
     for _ in range(2000):
@@ -42,3 +44,22 @@ def test_birim_pod_esdegerligi():
         n = hz.birim.pod_sayisi(talep)
         bekleyen = np.maximum(np.array(n) - (pod_kap * x[:, None]).sum(0), 0)
         assert np.array_equal(bekleyen > 0, talep > kap + 1e-9)
+
+
+def test_senaryo_komutlari(tmp_path):
+    """Panel komutu: darbe 3 saat (36 adım) ×2, sonra kendiliğinden biter; "normal" etkin senaryoyu bitirir."""
+    import json
+
+    from demo.calistir import Senaryo
+    sc = Senaryo(tmp_path)
+    assert sc.guncelle(0) == ("", 1.0)
+    (tmp_path / "komut.json").write_text(json.dumps({"senaryo": "darbe", "id": 1}))
+    assert sc.guncelle(10) == ("darbe", 2.0)
+    assert sc.guncelle(10 + 35) == ("darbe", 2.0)
+    assert sc.guncelle(10 + 36) == ("", 1.0)
+    (tmp_path / "komut.json").write_text(json.dumps({"senaryo": "basamak", "id": 2}))
+    assert sc.guncelle(100) == ("basamak", 1.5)
+    assert sc.guncelle(500) == ("basamak", 1.5)
+    (tmp_path / "komut.json").write_text(json.dumps({"senaryo": "normal", "id": 3}))
+    assert sc.guncelle(501) == ("", 1.0)
+    assert [(g["ad"], g["bas"], g["bit"]) for g in sc.durum()["gecmis"]] == [("darbe", 10, 46), ("basamak", 100, 501)]

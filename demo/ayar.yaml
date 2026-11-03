@@ -3,7 +3,7 @@
 
 havuz: bitbrains_fastStorage   # data/processed/pool_<havuz>.parquet ve pool5_<havuz>.parquet
 model: sarima                  # outputs/forecasts/<veri_seti>/<havuz>/<model>/forecast_<gün>.parquet
-strateji: r2_uyumlu            # ilp: yalnız tahmine dayalı ILP · r2_uyumlu: ILP + plana uyumlu eşikli tampon
+strateji: ikisi                # ikisi: ikisi yan yana · ilp: yalnız tahmine dayalı ILP · r2_uyumlu: ILP + tampon
 bas_gun: 25                    # İlk canlı gün (fastStorage'da test dönemi 24–29. günler). 25. gün test döneminin
                                # en hareketli günü: yalnız ILP 12 saat, ILP + tampon 6 saat eksik kalır (gösterim için)
 gun_sayisi: 1                  # Kaç gün canlandırılacak (tüm test dönemi için 6)
@@ -20,7 +20,7 @@ hiz:
   saat_saniye: 15              # 1 benzetim saati = 15 gerçek saniye (12 adım × 1,25 s); bir gün ≈ 6 dakika
 
 kume:
-  ad_alani: kapasite-demo      # Demo pod'larının namespace'i
+  ad_alani_onek: kapasite      # Namespace'ler: kapasite-ilp, kapasite-r2
   yerlesme_zaman_asimi_s: 30   # Bir adımda pod'ların yerleşmesi için en fazla bekleme
 
-cikti: demo/cikti              # adim.csv, saat.csv, durum.json (panel bunları okur)
+cikti: demo/cikti              # <grup>/adim.csv, <grup>/saat.csv, durum.json, komut.json (panel)

@@ -19,7 +19,7 @@ import numpy as np
 from demo.cekirdek import Birim
 from src.ilp.model import SunucuTipleri
 
-ETIKET = "kapasite-demo"                 # bu demonun oluşturduğu her nesnede bulunan etiket anahtarı
+ETIKET = "kapasite-demo"                 # bu demonun her nesnesindeki etiket anahtarı; değeri grup adıdır (ilp / r2)
 UYGULAMALAR = ("islemci-yuk", "bellek-yuk")
 
 
@@ -69,11 +69,14 @@ class SahteKume:
 class KubeKume:
     """Gerçek Kubernetes kümesi (kind + KWOK)."""
 
-    def __init__(self, tipler: SunucuTipleri, birim: Birim, ad_alani: str, fiyat: np.ndarray):
+    def __init__(self, tipler: SunucuTipleri, birim: Birim, grup: str, ad_alani: str, fiyat: np.ndarray):
+        """grup: aynı kümede yan yana çalışan stratejileri ayırır (ör. "ilp", "r2"). Her grubun kendi
+        düğümleri (etiket kapasite-demo=<grup>) ve kendi namespace'indeki yük Deployment'ları vardır;
+        bir grubun pod'ları yalnız kendi grubunun düğümlerine yerleşebilir."""
         from kubernetes import client, config
         config.load_kube_config()
         self.c, self.core, self.apps = client, client.CoreV1Api(), client.AppsV1Api()
-        self.tipler, self.birim, self.ns, self.fiyat = tipler, birim, ad_alani, fiyat
+        self.tipler, self.birim, self.grup, self.ns, self.fiyat = tipler, birim, grup, ad_alani, fiyat
         self.pod_kap = birim.dugum_pod_kapasitesi(tipler)
         self.sayac = 0                                               # yeni düğüm adları için
         self.istek = (0, 0)
@@ -98,16 +101,16 @@ class KubeKume:
                 if h.status != 404:
                     raise
             sablon = c.V1PodTemplateSpec(
-                metadata=c.V1ObjectMeta(labels={"app": ad, ETIKET: "1"}),
+                metadata=c.V1ObjectMeta(labels={"app": ad, ETIKET: self.grup}),
                 spec=c.V1PodSpec(
-                    node_selector={ETIKET: "1"},
+                    node_selector={ETIKET: self.grup},
                     tolerations=[c.V1Toleration(key="kwok.x-k8s.io/node", operator="Exists",
                                                 effect="NoSchedule")],
                     termination_grace_period_seconds=0,
                     containers=[c.V1Container(name="is", image="sahte-imaj",
                                               resources=c.V1ResourceRequirements(requests=istek))]))
             dep = c.V1Deployment(
-                metadata=c.V1ObjectMeta(name=ad, labels={ETIKET: "1"}),
+                metadata=c.V1ObjectMeta(name=ad, labels={ETIKET: self.grup}),
                 spec=c.V1DeploymentSpec(replicas=0, selector=c.V1LabelSelector(match_labels={"app": ad}),
                                         template=sablon))
             self.apps.create_namespaced_deployment(self.ns, dep)
@@ -116,7 +119,7 @@ class KubeKume:
     def _dugumler(self) -> dict[int, list[str]]:
         """Tip dizini → bu demonun düğüm adları (eskiden yeniye)."""
         sonuc: dict[int, list[str]] = {k: [] for k in range(self.tipler.K)}
-        for n in self.core.list_node(label_selector=f"{ETIKET}=1").items:
+        for n in self.core.list_node(label_selector=f"{ETIKET}={self.grup}").items:
             k = self.tipler.ad.index(n.metadata.labels["node.kubernetes.io/instance-type"])
             sonuc[k].append(n.metadata.name)
         for k in sonuc:
@@ -130,13 +133,13 @@ class KubeKume:
     def _dugum_ac(self, k: int) -> None:
         c, ad_tip = self.c, self.tipler.ad[k]
         self.sayac += 1
-        ad = f"{_kisa(ad_tip)}-{self.sayac:05d}"
+        ad = f"{self.grup}-{_kisa(ad_tip)}-{self.sayac:05d}"
         kap = {"cpu": _sayi(self.tipler.C[k]), "memory": f"{_sayi(self.tipler.M[k])}Gi", "pods": "110"}
         dugum = c.V1Node(
             metadata=c.V1ObjectMeta(
                 name=ad,
                 annotations={"kwok.x-k8s.io/node": "fake", "kapasite.ytu/fiyat-usd-saat": str(self.fiyat[k])},
-                labels={ETIKET: "1", "node.kubernetes.io/instance-type": ad_tip,
+                labels={ETIKET: self.grup, "node.kubernetes.io/instance-type": ad_tip,
                         "kubernetes.io/hostname": ad}),
             spec=c.V1NodeSpec(taints=[c.V1Taint(key="kwok.x-k8s.io/node", value="fake", effect="NoSchedule")]),
             status=c.V1NodeStatus(allocatable=kap, capacity=kap))
@@ -180,7 +183,8 @@ class KubeKume:
 
         dugumler verilirse, var olmayan bir düğüme bağlı (yetim) pod yerleşmiş sayılmaz; silinir ki Deployment
         yerine yenisini açsın. Böylece ölçüm yalnızca gerçekten var olan kapasiteyi yansıtır."""
-        yanit = self.core.list_namespaced_pod(self.ns, label_selector=f"{ETIKET}=1", _preload_content=False)
+        yanit = self.core.list_namespaced_pod(self.ns, label_selector=f"{ETIKET}={self.grup}",
+                                              _preload_content=False)
         durum = {a: {"toplam": 0, "yerlesik": 0, "siliniyor": 0} for a in UYGULAMALAR}
         for pod in json.loads(yanit.data)["items"]:
             d = durum.get(pod["metadata"]["labels"].get("app"))
@@ -233,6 +237,26 @@ class KubeKume:
             time.sleep(0.2)
         for ad in sum(self._dugumler().values(), []):
             self.core.delete_node(ad)
+
+
+def kumeyi_sifirla(onek: str, zaman_asimi_s: float = 120) -> None:
+    """Önceki koşulardan kalan her şeyi kaldırır: adı <onek> ile başlayan namespace'lerdeki yük
+    Deployment'ları (pod'larıyla), ardından bu demonun etiketini taşıyan tüm düğümler. Pod'lar düğümlerden önce
+    silinir: KWOK pod'u ancak düğümü varken kapatabilir."""
+    from kubernetes import client, config
+    config.load_kube_config()
+    core, apps = client.CoreV1Api(), client.AppsV1Api()
+    for ns in core.list_namespace().items:
+        if ns.metadata.name.startswith(onek):
+            for dep in apps.list_namespaced_deployment(ns.metadata.name, label_selector=ETIKET).items:
+                apps.delete_namespaced_deployment(dep.metadata.name, ns.metadata.name, propagation_policy="Foreground")
+    t0 = time.monotonic()
+    while (core.list_pod_for_all_namespaces(label_selector=ETIKET, limit=1).items
+           or apps.list_deployment_for_all_namespaces(label_selector=ETIKET, limit=1).items) and \
+            time.monotonic() - t0 < zaman_asimi_s:
+        time.sleep(0.5)
+    for n in core.list_node(label_selector=ETIKET).items:
+        core.delete_node(n.metadata.name)
 
 
 def _sayi(v: float) -> str:

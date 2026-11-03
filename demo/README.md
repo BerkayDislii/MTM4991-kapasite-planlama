@@ -23,22 +23,41 @@ bash demo/k8s/kume_kur.sh                          # kind kümesi + KWOK + hız 
 İki terminal açın (ikisi de proje kökünde):
 
 ```bash
-# Terminal 1: demo (varsayılan: fastStorage, SARIMA, ILP + R2 tamponu, test günü 24, 1 gün ≈ 6 dk)
+# Terminal 1: demo — varsayılan: fastStorage, SARIMA, test günü 25, iki strateji yan yana, 1 gün ≈ 6 dk
 .venv/bin/python -m demo.calistir
 
 # Terminal 2: canlı panel → http://localhost:8501
 .venv/bin/streamlit run demo/panel.py --client.toolbarMode minimal --browser.gatherUsageStats false
 ```
 
+**Yan yana iki strateji.** Aynı kümede iki ayrı düğüm grubu çalışır: `ilp` (yalnız tahmine dayalı ILP planı)
+ve `r2` (aynı plan + tepkisel tampon). İkisi de aynı talebi aynı anda yaşar; panel ikisini aynı grafiklerde
+gri ve turuncu çizgiyle gösterir.
+
+**Senaryo düğmeleri.** Panelden talep canlı olarak bozulabilir (çarpanlar raporun sentetik senaryolarıyla
+aynı, `configs/synthetic.yaml`):
+
+| Düğme | Etkisi | Ne gösterir? |
+|---|---|---|
+| Darbe | 3 saat boyunca talep ×2 | Plan habersiz; tampon yaklaşık bir saat içinde açığı kapatır |
+| Basamak | Koşu sonuna dek talep ×1,5 | Kalıcı artışta tampon sürekli devrede kalır |
+| Düşüş | Koşu sonuna dek talep ×0,5 | Sistemin zayıf noktası: plan büyük kalır, tampon bunu düzeltemez |
+| Normale dön | Etkin senaryoyu bitirir | — |
+
+Sınırlılık: senaryo yalnız canlı talebi bozar; ertesi günün tahmini önceden hesaplandığı için bozulmayı
+"öğrenmez" (raporun sentetik deneylerinde ise tahmin bozulmuş seride yeniden üretilmişti).
+
 Sık kullanılan seçenekler (`.venv/bin/python -m demo.calistir --yardim`):
 
 | Seçenek | Anlamı |
 |---|---|
-| `--strateji ilp` | Tamponu kapat: yalnız tahmine dayalı ILP planı |
+| `--strateji r2_uyumlu` / `ilp` | Tek strateji çalıştır |
 | `--gun-sayisi 6 --hizli` | Tüm test dönemi, beklemeden (doğrulama için) |
-| `--saat-saniye 6` | Daha hızlı oynat (1 benzetim saati = 6 s) |
+| `--saat-saniye 8` | Daha hızlı oynat (1 benzetim saati = 8 s) |
 | `--kuru` | Kubernetes olmadan, bellek içi kümeyle (hesap denetimi) |
 | `--kayitli-plan` | ILP'yi canlı çözmek yerine raporun kayıtlı planını kullan |
+
+Her koşu başında önceki koşulardan kalan düğüm ve pod'lar kendiliğinden temizlenir.
 
 ## Doğrulama
 
@@ -47,7 +66,9 @@ Sık kullanılan seçenekler (`.venv/bin/python -m demo.calistir --yardim`):
 .venv/bin/python -m pytest demo/test_demo.py -q
 ```
 
-`dogrula` her saat için düğüm sayılarını, eksik kapasiteli saatleri ve maliyeti benzetimle karşılaştırır.
+`dogrula` her strateji grubu için düğüm sayılarını, eksik kapasiteli saatleri (ve her 5 dk adımda bekleyen pod
+sayısını) ve maliyeti benzetimle karşılaştırır. Senaryo verildiyse yalnız senaryodan önceki saatler
+karşılaştırılır; sonrası için iki strateji yan yana raporlanır.
 Tüm test dönemi (`--gun-sayisi 6`) için raporun Tablo 4.9 değerleri yeniden elde edilir: R2 (uyumlu)
 927 USD/gün ve %8,3 eksik saat; yalnız ILP 887 USD/gün ve %15,3 eksik saat.
 
@@ -58,9 +79,9 @@ Tüm test dönemi (`--gun-sayisi 6`) için raporun Tablo 4.9 değerleri yeniden 
 | `ayar.yaml` | Havuz, model, strateji, gün, birim pod, hız |
 | `cekirdek.py` | Veri, ILP planlayıcı (gün gün) ve R2 tamponu (saat saat); Kubernetes'ten bağımsız |
 | `kume.py` | Küme katmanı: `KubeKume` (gerçek API) ve `SahteKume` (bellek içi) |
-| `calistir.py` | Ana döngü ve CSV kayıtları (`cikti/adim.csv`, `cikti/saat.csv`, `cikti/durum.json`) |
+| `calistir.py` | Ana döngü, senaryo komutları ve CSV kayıtları (`cikti/<grup>/adim.csv`, `saat.csv`, `cikti/durum.json`) |
 | `dogrula.py` | Demoyu benzetimle karşılaştırır |
-| `panel.py` | Streamlit paneli |
+| `panel.py` | Streamlit paneli ve senaryo düğmeleri |
 | `k8s/kume_kur.sh` | Küme kurulumu |
 | `k8s/ornek-*.yaml` | Elle deneme için tek düğüm ve 5 pod'luk örnek |
 
