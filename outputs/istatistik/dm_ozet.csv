@@ -1,0 +1,17 @@
+veri_seti,A,B,kaynak,A_iyi,fark_yok,B_iyi,n_seri
+alibaba,lstm,mevsimsel_naif,cpu,0,72,0,72
+alibaba,lstm,mevsimsel_naif,mem,0,72,0,72
+alibaba,sarima,mevsimsel_naif,cpu,0,24,0,24
+alibaba,sarima,mevsimsel_naif,mem,0,24,0,24
+alibaba,sarima,son_deger,cpu,0,24,0,24
+alibaba,sarima,son_deger,mem,0,24,0,24
+alibaba,son_deger,mevsimsel_naif,cpu,0,24,0,24
+alibaba,son_deger,mevsimsel_naif,mem,0,24,0,24
+bitbrains,lstm,mevsimsel_naif,cpu,0,18,3,21
+bitbrains,lstm,mevsimsel_naif,mem,0,21,0,21
+bitbrains,sarima,mevsimsel_naif,cpu,0,7,0,7
+bitbrains,sarima,mevsimsel_naif,mem,0,7,0,7
+bitbrains,sarima,son_deger,cpu,0,5,2,7
+bitbrains,sarima,son_deger,mem,1,6,0,7
+bitbrains,son_deger,mevsimsel_naif,cpu,3,4,0,7
+bitbrains,son_deger,mevsimsel_naif,mem,0,7,0,7
