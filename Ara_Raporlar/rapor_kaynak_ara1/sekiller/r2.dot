@@ -1,0 +1,20 @@
+digraph G {
+  graph [rankdir=TB, dpi=300, fontname="Liberation Serif", nodesep=0.3, ranksep=0.28, bgcolor=white];
+  node  [shape=box, style="rounded,filled", fillcolor="#f2f2f2", color="#333333", fontname="Liberation Serif", fontsize=11, margin="0.12,0.05"];
+  edge  [color="#333333", fontname="Liberation Serif", fontsize=10, arrowsize=0.7];
+  bas  [label=<Dilim <I>t</I>: önceki dilimin gerçek talebi <I>D</I><SUB>t−1</SUB> ve toplam kapasitesi gözlenir>];
+  u    [label=<Kullanım oranı <I>u</I><SUB>t−1</SUB> = max<SUB>r</SUB> <I>D</I><SUP>r</SUP><SUB>t−1</SUB> / kap<SUP>r</SUP><SUB>t−1</SUB><BR/>Gerekli tampon <I>g</I><SUB>t</SUB> (Eşitlik 3.30)>];
+  q1   [label=<<I>u</I><SUB>t−1</SUB> &gt; τ<SUB>üst</SUB> ?>, shape=diamond, style=filled, fillcolor=white, margin="0.02,0.02"];
+  q2   [label=<<I>u</I><SUB>t−1</SUB> &lt; τ<SUB>alt</SUB> ve<BR/>soğuma doldu mu?>, shape=diamond, style=filled, fillcolor=white, margin="0.02,0.02"];
+  b1   [label=<<I>b</I><SUB>t</SUB> = max(<I>b</I><SUB>t−1</SUB>, <I>g</I><SUB>t</SUB>)<BR/>(büyüt)>];
+  b2   [label=<<I>b</I><SUB>t</SUB> = min(<I>b</I><SUB>t−1</SUB>, <I>g</I><SUB>t</SUB>)<BR/>(küçült)>];
+  b3   [label=<<I>b</I><SUB>t</SUB> = <I>b</I><SUB>t−1</SUB><BR/>(değiştirme)>];
+  lk   [label=<<I>b</I><SUB>t</SUB> ← max(<I>b</I><SUB>t</SUB>, son <I>L</I>−1 dilimde açılan tampon)<BR/>(minimum çalışma süresi)>];
+  son  [label=<Sunucu sayısı: ILP planı + <I>b</I><SUB>t</SUB> adet m8i.xlarge>, fillcolor="#d9d9d9"];
+  bas -> u -> q1;
+  q1 -> b1 [label=" evet"];
+  q1 -> q2 [label=" hayır"];
+  q2 -> b2 [label=" evet"];
+  q2 -> b3 [label=" hayır"];
+  b1 -> lk; b2 -> lk; b3 -> lk; lk -> son;
+}

@@ -1,0 +1,24 @@
+digraph G {
+  graph [rankdir=TB, dpi=300, fontname="Liberation Serif", nodesep=0.35, ranksep=0.32, bgcolor=white];
+  node  [shape=box, style="rounded,filled", fillcolor="#f2f2f2", color="#333333", fontname="Liberation Serif", fontsize=11, margin="0.15,0.06"];
+  edge  [color="#333333", fontname="Liberation Serif", fontsize=10, arrowsize=0.7];
+  veri  [label="Ham iş yükü izleri\nBitbrains GWA-T-12 (VM) · Alibaba v2018 (makine)"];
+  on    [label=<Ön işleme<BR/>5 dk ızgara · birim dönüşümü · havuz toplamı · saatlik tepe <I>D</I><SUB>t</SUB>>];
+  tah   [label="Gün-ileri tahmin (24 sa)\nP0: mevsimsel naif, son değer · P1: SARIMA · P2: LSTM"];
+  aws   [label="AWS sunucu tipleri\nc8i / m8i / r8i.xlarge", shape=note, style=filled, fillcolor=white];
+  ilp   [label=<Çok dönemli ILP (OR-Tools + SCIP)<BR/>min maliyet · kapasite ≥ (1+α)<I>D̂</I><SUB>t</SUB> · açma maliyeti · min. çalışma süresi>, fillcolor="#d9d9d9"];
+  tam   [label=<Tepkisel tampon (R2)<BR/>eşik kuralı, girdi <I>D</I><SUB>t−1</SUB>>];
+  deg   [label=<Değerlendirme (gerçek talep <I>D</I><SUB>t</SUB>)<BR/>maliyet · regret · eksik kapasiteli saat · karşılanmayan talep>, fillcolor="#d9d9d9"];
+  kah   [label=<Kahin ILP<BR/>(girdi: gerçek <I>D</I><SUB>t</SUB>)>, fillcolor=white, style="rounded,dashed"];
+  tep   [label=<Tepkisel yöntemler<BR/>R0 Tepkisel-ILP · R1 eşik kuralı<BR/>(girdi <I>D</I><SUB>t−1</SUB>)>, fillcolor=white, style="rounded,dashed"];
+  veri -> on -> tah;
+  tah -> ilp [label=<  <I>D̂</I><SUB>t</SUB>>];
+  aws -> ilp [style=dashed, arrowhead=none];
+  ilp -> tam [label=<  plan <I>x</I><SUB>k,t</SUB>>];
+  tam -> deg;
+  ilp -> deg [label="  yalnız ILP"];
+  on -> kah [style=dashed]; on -> tep [style=dashed];
+  kah -> deg [style=dashed, label=" alt sınır"]; tep -> deg [style=dashed];
+  {rank=same; aws; ilp}
+  {rank=same; kah; tah}
+}
